@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style type="text/css">
+	body{margin:0;}
+	#ul1{
+		width:1080px;
+		margin:100px auto 0;
+	}
+
+	#ul1 li{
+		list-style: none;
+		width:247px;
+		float:left;
+		margin-right:9px;
+	}
+
+	#ul1 li div{
+		border:1px solid #000;
+		padding:10px;
+		margin-bottom: 10px;
+	}
+
+	img{
+		width:225px;
+		display:block;
+	}
+</style>
+<script type="text/javascript" src='ajax.js'></script>
+<script src="echo.min.js"></script>
+<script type="text/javascript">
+
+window.onload=function()
+{
+
+
+
+	var oUl=document.getElementById('ul1');
+	var aLi=oUl.getElementsByTagName('li');
+	var iLen=aLi.length;
+	var iPage=1;
+	var b=true;
+
+
+	//获取初始化数据
+	getList();
+
+	function getList()
+	{
+		ajax('get','getPIcs.php','cpage='+iPage,function(data)
+		{
+			var data=JSON.parse(data);
+			//后续没有数据了
+			if(!data.length)
+			{
+				return;
+			}
+
+			for(var i=0;i<data.length;i++)
+			{
+				var _index=getShortLi();
+
+				var oDiv=document.createElement('div');
+				var oImg=document.createElement('img');
+				oImg.src='loading.gif';
+				oImg.setAttribute("data-echo",data[i].preview);
+				oImg.style.width='225px';
+				oImg.style.height=data[i].height*(225/data[i].width)+'px';
+				oDiv.appendChild(oImg);
+				var oP=document.createElement('p');
+				oP.innerHTML=data[i].title;
+				oDiv.appendChild(oP);
+
+				aLi[_index].appendChild(oDiv);
+				echo.init({
+					offset: 0,
+					throttle: 0
+				});
+			}
+
+			b=true;
+		});
+	}
+
+	window.onscroll=function()
+	{
+		var _index=getShortLi();
+		var oLi=aLi[_index];
+		var scrollTop=document.documentElement.scrollTop||document.body.scrollTop;
+
+		if(oLi.offsetHeight+getTop(oLi)<document.documentElement.clientHeight+scrollTop)
+		{
+			if(b)
+			{
+				b=false;
+				iPage++;
+				getList();
+			}
+		}
+	}
+
+
+
+	//取最短的li
+	function getShortLi()
+	{
+		var index=0;
+		var ih=aLi[index].offsetHeight;
+		for(var i=1;i<iLen;i++)
+		{
+			if(aLi[i].offsetHeight<ih)
+			{
+				index=i;
+				ih=aLi[i].offsetHeight;
+			}
+		}
+		return index;
+	}
+
+	function getTop(obj)
+	{
+		var iTop=0;
+		while(obj)
+		{
+			iTop+=obj.offsetTop;
+			obj=obj.offsetParent;
+		}
+		return iTop;
+	}
+	
+
+}
+</script>
+	<title></title>
+</head>
+<body>
+<ul id="ul1">
+	<li></li>
+	<li></li>
+	<li></li>
+	<li></li>
+</ul>
+</body>
+</html>
